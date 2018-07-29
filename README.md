@@ -1,5 +1,5 @@
 # Experimental-Data-Processing-of-SHPB
-Experimental data of rdinary material with obvious strain rate effect from SHPB test can be processed well by this program.
+Experimental data of ordinary material with obvious strain rate effect from SHPB test can be processed well by this program.
 
 The outputs of program includes relative curves and EXCEL file containg stress, strain and strain data.
 
