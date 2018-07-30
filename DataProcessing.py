@@ -32,7 +32,9 @@ currDir = os.getcwd()
 fileName = input("Data file name is: ")
 fileAbsoluteDir = os.path.join(currDir, fileName + ".txt")
 dataStoreDir = os.path.join(currDir, fileName)
-os.mkdir(dataStoreDir)
+
+if not os.path.exists(dataStoreDir):
+  os.mkdir(dataStoreDir)
 
 shutil.copyfile(fileAbsoluteDir, os.path.join(dataStoreDir, fileName + ".txt"))
 
@@ -58,7 +60,8 @@ trueStress, trueStrainRate, trueStrain = \
 
 Functions.DrawStressStrainPlot(dataStoreDir, engStress, engStrain)
 
-kTrue, b = Functions.FittingStrainRate(dataStoreDir, timeModified, trueStrain)
+kEng, b = Functions.FittingStrainRate(dataStoreDir, timeModified, engStrain, False)
+kTrue, b = Functions.FittingStrainRate(dataStoreDir, timeModified, trueStrain, True)
 
 print("Strain rate is: ", kTrue)
 
