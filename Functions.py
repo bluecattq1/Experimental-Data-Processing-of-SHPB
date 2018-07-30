@@ -131,7 +131,7 @@ def residuals(p, X, Y):
     k, b = p
     return Y - k * X - b
 
-def FittingStrainRate(dataStoreDir,time, strain):
+def FittingStrainRate(dataStoreDir,time, strain， flag):
     #拟合时间-应变曲线，获得应变率
     for counter, temp in enumerate(strain):
         if temp >= 0.05 * max(strain):
@@ -143,20 +143,21 @@ def FittingStrainRate(dataStoreDir,time, strain):
     #将除p以外的参数打包至args中
     r = optimize.leastsq(residuals, [60, 3], args = (X, Y))
     k, b = r[0]
-    
-    YFitting = [k * temp + b for temp in X]
-    plt.figure(figsize = (8, 4))
-    plt.plot(time, strain, "r_", label = "Calculated strain", linewidth = 2)
-    plt.plot(X, YFitting, "b--", label = "Fitted curve", linewidth = 2)
-    plt.xlabel("Time/$s$")
-    plt.ylabel("Strain")
-    plt.title("True Strain - Time curve")
-    plt.legend()
+        
+    if flag == True:
+        YFitting = [k * temp + b for temp in X]
+        plt.figure(figsize = (8, 4))
+        plt.plot(time, strain, "r_", label = "Calculated strain", linewidth = 2)
+        plt.plot(X, YFitting, "b--", label = "Fitted curve", linewidth = 2)
+        plt.xlabel("Time/$s$")
+        plt.ylabel("Strain")
+        plt.title("True Strain - Time curve")
+        plt.legend()
 
-    plt.show
+        plt.show
     
-    filePath = os.path.join(dataStoreDir, "Strain-Time and Fitting Curve.png")
-    plt.savefig(filePath, dpi = 240)
+        filePath = os.path.join(dataStoreDir, "Strain-Time and Fitting Curve.png")
+        plt.savefig(filePath, dpi = 240)
     
     return k, b
 
