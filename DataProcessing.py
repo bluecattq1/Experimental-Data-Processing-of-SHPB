@@ -36,32 +36,28 @@ os.mkdir(dataStoreDir)
 
 shutil.copyfile(fileAbsoluteDir, os.path.join(dataStoreDir, fileName + ".txt"))
 
-time, inputBarChannel, transBarChannel = Functions.ExtractDataFromFile(
-        dataStoreDir, fileAbsoluteDir)
+time, inputBarChannel, transBarChannel = Functions.ExtractDataFromFile(dataStoreDir, fileAbsoluteDir)
 
 #flag = input("Needed to make reflect wave negative?(Y/N)")
 #if flag == "Y":
 #    inputBarChannel = [-temp for temp in inputBarChannel]
 
-inputChannel, transChannel = Functions.MovingChannelSignals(
-        dataStoreDir, time, inputBarChannel, transBarChannel)
+inputChannel, transChannel = Functions.MovingChannelSignals(dataStoreDir, time, inputBarChannel, transBarChannel)
 
-timeModified, reflectWave, transWave = Functions.FindingSections(
-        dataStoreDir, time, inputChannel, transChannel)
+timeModified, reflectWave, transWave = Functions.FindingSections(dataStoreDir, time, inputChannel, transChannel)
 
 engStress, engStrain, engStrainRate = Functions.Calculations(timeModified, 
                 reflectWave, transWave, K, barWaveSpeed, barElasticModulus, 
                 areaBar, specimenLength, areaSpecimen)
 
-trueStress, trueStrainRate, trueStrain = \
-    Functions.EngineeringToTrue(engStress, engStrain, engStrainRate)
+trueStress, trueStrainRate, trueStrain = Functions.EngineeringToTrue(engStress, engStrain, engStrainRate)
 
 Functions.DrawStressStrainPlot(dataStoreDir, engStress, engStrain)
 
-kTrue, b = Functions.FittingStrainRate(dataStoreDir, timeModified, trueStrain)
+kEng, b = Functions.FittingStrainRate(dataStoreDir, timeModified, engStrain, False)
+kTrue, b = Functions.FittingStrainRate(dataStoreDir, timeModified, trueStrain, True)
 
 print("Strain rate is: ", kTrue)
 
-Functions.WritingDataToExcel(dataStoreDir, timeModified, engStress, \
-                             engStrain, engStrainRate, trueStress, \
+Functions.WritingDataToExcel(dataStoreDir, timeModified, engStress, engStrain, engStrainRate, trueStress, 
                              trueStrain, trueStrainRate, kTrue, kEng)
