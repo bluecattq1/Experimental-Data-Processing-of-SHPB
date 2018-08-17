@@ -9,8 +9,8 @@ class SelectCurve(object):
     def WriteCoordinates(self, target, event):
         if target is not None:
             time = target.get_xdata(orig = True)
-            xdata = float(event.xdata)
-            ydata = float(event.ydata)
+            xdata = event.xdata
+            ydata = event.ydata
             n = int((xdata - time[0]) / (time[1] - time[0]))
             info = "Time: {:.7f}\nVoltage: {:.10f}\nNumber of index:{}".format(xdata, ydata, n)
         else:
@@ -30,7 +30,6 @@ class SelectCurve(object):
                 break
         
         self.WriteCoordinates(target, event)
-
 
         #以下写法将在鼠标离开曲线后保持显示离开之前的数据点的信息
         """
