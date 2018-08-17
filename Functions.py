@@ -8,6 +8,8 @@ import os.path
 from scipy import optimize
 from xlwt import Workbook
 
+from InteractiveClass import SelectCurve
+
 def ExtractDataFromFile(dataStoreDir, fileName):
     #从.txt文件提取数据
     outputf = open(fileName, 'r')
@@ -31,25 +33,27 @@ def ExtractDataFromFile(dataStoreDir, fileName):
     
     return time, inputBarChannel, transBarChannel
 
-def DrawChannelSignalsPlot(dataStoreDir, plotName, time, 
-                           inputBarChannel, transBarChannel):
+def DrawChannelSignalsPlot(dataStoreDir, plotName, time, inputBarChannel, transBarChannel):
     #绘制信号图
-    plt.figure(figsize = (8, 4))
+    plt.close('all')
     
-    plt.plot(time, inputBarChannel, label = "InputBar", 
-             color = "red", linewidth = 2)
-    plt.plot(time, transBarChannel, label = "TransmissionBar", 
-             color = "b", linewidth = 2)
+    fig = plt.figure(figsize = (8, 4))
+    ax = fig.add_subplot(111)
+    
+    ax.plot(time, inputBarChannel, label = "InputBar", color = "red", linewidth = 2)
+    ax.plot(time, transBarChannel, label = "TransmissionBar", color = "b", linewidth = 2)
+    
+    ch = SelectCurve(ax)
     
     plt.xlabel("Time/$s$")
     plt.ylabel("Voltage/$v$")
     plt.legend()
     plt.title(plotName.split(".")[0])
     
-    plt.show
-    
     filePath = os.path.join(dataStoreDir, plotName)
     plt.savefig(filePath, dpi = 240)
+    
+    plt.show()
     
 def MovingChannelSignals(dataStoreDir, time, inputBarChannel, transBarChannel): 
     #上下平移入射波和投射波——归零
@@ -131,7 +135,7 @@ def residuals(p, X, Y):
     k, b = p
     return Y - k * X - b
 
-def FittingStrainRate(dataStoreDir,time, strain):
+def FittingStrainRate(dataStoreDir,time, strain, flag):
     #拟合时间-应变曲线，获得应变率
     for counter, temp in enumerate(strain):
         if temp >= 0.05 * max(strain):
@@ -144,20 +148,29 @@ def FittingStrainRate(dataStoreDir,time, strain):
     r = optimize.leastsq(residuals, [60, 3], args = (X, Y))
     k, b = r[0]
     
-    YFitting = [k * temp + b for temp in X]
-    plt.figure(figsize = (8, 4))
-    plt.plot(time, strain, "r_", label = "Calculated strain", linewidth = 2)
-    plt.plot(X, YFitting, "b--", label = "Fitted curve", linewidth = 2)
-    plt.xlabel("Time/$s$")
-    plt.ylabel("Strain")
-    plt.title("True Strain - Time curve")
-    plt.legend()
-
-    plt.show
-    
-    filePath = os.path.join(dataStoreDir, "Strain-Time and Fitting Curve.png")
-    plt.savefig(filePath, dpi = 240)
-    
+    if flag == True:
+        YFitting = [k * temp + b for temp in X]
+        
+        plt.close('all')
+        
+        fig, ax = plt.figure(figsize = (8, 4))
+        ax.plot(time, strain, "r_", label = "Calculated strain", linewidth = 2)
+        ax.plot(X, YFitting, "b--", label = "Fitting curve", linewidth = 2)
+        ax.text(0.98, 0.05, 
+                 'Fitting linear equation:\n $\\varepsilon = {}t{:+.3f}$'.format(round(k, 3), round(b, 3)),
+                 horizontalalignment = 'right', verticalalignment = 'bottom', 
+                 transform = ax.transAxes, 
+                 bbox = {"facecolor": "blue", "alpha": 0.15})
+        plt.xlabel("Time/$s$")
+        plt.ylabel("Strain $\\varepsilon$")
+        plt.title("Strain - Time curve")
+        plt.legend()
+        
+        filePath = os.path.join(dataStoreDir, "Strain-Time and Fitting Curve.png")
+        plt.savefig(filePath, dpi = 240)
+        
+        plt.show()
+   
     return k, b
 
 def DrawStressStrainPlot(dataStoreDir, stress, strain):
@@ -170,18 +183,20 @@ def DrawStressStrainPlot(dataStoreDir, stress, strain):
         if temp >= 0.5 * max(stress):
             markEnd = len(stress) - counter
             break
-
+    
+    plt.close('all')
+    
     plt.figure(figsize = (8, 4))
     plt.plot(strain[1: markEnd], stress[1: markEnd], color = "red", 
              linewidth = 2)
     plt.xlabel("Engineering Strain$\\varepsilon$")
     plt.ylabel("Engineering Stress$\\sigma/MPa$")
     plt.title("$\\sigma$-$\\varepsilon$ curve")
-
-    plt.show
     
     filePath = os.path.join(dataStoreDir, "Stress-Strain Curve.png")
     plt.savefig(filePath, dpi = 240)
+
+    plt.show()
     
 def EngineeringToTrue(engStress, engStrain, engStrainRate):
     #工程数据转换成真实数据
