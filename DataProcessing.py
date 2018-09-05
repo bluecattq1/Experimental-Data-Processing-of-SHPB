@@ -30,8 +30,14 @@ areaSpecimen = specimenDiameter**2
 
 #currDir = os.getcwd()
 currDir = os.path.split(__file__)[0]
-fileName = input("Data file name is: ")
-fileAbsoluteDir = os.path.join(currDir, fileName + ".txt")
+while True:
+  fileName = input("Data file name is: ")
+  fileAbsoluteDir = os.path.join(currDir, fileName + ".txt")
+
+  if os.path.exists(fileAbsoluteDir):
+    break
+  else:
+    print("Erorr! File doesn't exist! Please enter again. NOTICE: FILE NAME WITHOUT .txt")
 dataStoreDir = os.path.join(currDir, fileName)
 
 if not os.path.exists(dataStoreDir):
